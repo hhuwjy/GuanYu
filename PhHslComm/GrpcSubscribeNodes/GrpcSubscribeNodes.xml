@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ * Copyright (c) 2005-2021 The OPC Foundation, Inc. All rights reserved.
+ *
+ * OPC Foundation MIT License 1.00
+ * 
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * The complete license agreement can be found here:
+ * http://opcfoundation.org/License/MIT/1.00/
+-->
+
+<UANodeSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">
+  <NamespaceUris>
+    <Uri>http://phoenixcontact.com/OpcUA/PLCnext/GlobalDataSpace/</Uri>
+  </NamespaceUris>
+  <Aliases>
+
+    <!--DustingMachineCell-->
+    <Alias Alias="zuojiaofeng">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.zuojiaofeng</Alias>
+	<Alias Alias="youjiaofeng">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.youjiaofeng</Alias>
+	<Alias Alias="dingfeng">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.dingfeng</Alias>
+	<Alias Alias="chongmo">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.chongmo</Alias>
+	<Alias Alias="reya">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.reya</Alias>
+	<Alias Alias="cefeng">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.cefeng</Alias>
+    <Alias Alias="SYS_Manual[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.SYS_Manual</Alias>
+	<Alias Alias="Senor_Alarm[0,0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Senor_Alarm</Alias>
+	<Alias Alias="Vacuum_Alarm[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Vacuum_Alarm</Alias>
+	<Alias Alias="Motor_NOTLimit_Err[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Motor_NOTLimit_Err</Alias>
+	<Alias Alias="Motor_Prevent_Promt[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Motor_Prevent_Promt</Alias>
+	<Alias Alias="Motor_POTLimit_Err[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Motor_POTLimit_Err</Alias>
+	<Alias Alias="Exception_information[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Exception_information</Alias>
+	<Alias Alias="Operation_prompt[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Operation_prompt</Alias>
+	<Alias Alias="Temperature_Alarm[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Temperature_Alarm</Alias>
+	<Alias Alias="Cylinder_Reset_Promt[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Cylinder_Reset_Promt</Alias>
+	<Alias Alias="Motor_Reset_Promt[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Motor_Reset_Promt</Alias>
+	<Alias Alias="Stopstate_Error[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Stopstate_Error</Alias>
+	<Alias Alias="Grating_Error[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Grating_Error</Alias>
+	<Alias Alias="Scapegoat_Error[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Scapegoat_Error</Alias>
+	<Alias Alias="Door_Error[1]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Door_Error</Alias>
+	<Alias Alias="out_power">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.out_power</Alias>
+	<Alias Alias="Production_statistics[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Production_statistics</Alias>
+	<Alias Alias="Cutterused_statistics[0]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Cutterused_statistics</Alias>
+	<Alias Alias="Y6[5]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Y6</Alias>
+	<Alias Alias="Manual_Andon[10]">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.Manual_Andon</Alias>
+	<Alias Alias="1">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S1</Alias>
+	<Alias Alias="2">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S2</Alias>
+	<Alias Alias="3">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S3</Alias>
+	<Alias Alias="4">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S4</Alias>
+	<Alias Alias="5">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S5</Alias>
+	<Alias Alias="6">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S6</Alias>
+	<Alias Alias="7">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S7</Alias>
+	<Alias Alias="8">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S8</Alias>
+	<Alias Alias="9">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S9</Alias>
+	<Alias Alias="10">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S10</Alias>
+	<Alias Alias="11">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S11</Alias>
+	<Alias Alias="12">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S12</Alias>
+	<Alias Alias="13">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S13</Alias>
+	<Alias Alias="14">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S14</Alias>
+	<Alias Alias="15">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S15</Alias>
+	<Alias Alias="16">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S16</Alias>
+	<Alias Alias="17">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S17</Alias>
+	<Alias Alias="18">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S18</Alias>
+	<Alias Alias="19">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S19</Alias>
+	<Alias Alias="20">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S20</Alias>
+	<Alias Alias="21">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S21</Alias>
+	<Alias Alias="22">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S22</Alias>
+	<Alias Alias="23">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S23</Alias>
+	<Alias Alias="24">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S24</Alias>
+	<Alias Alias="25">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S25</Alias>
+	<Alias Alias="26">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S26</Alias>
+	<Alias Alias="27">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S27</Alias>
+	<Alias Alias="28">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S28</Alias>
+	<Alias Alias="29">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S29</Alias>
+	<Alias Alias="30">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S30</Alias>
+	<Alias Alias="31">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S31</Alias>
+	<Alias Alias="32">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S32</Alias>
+	<Alias Alias="33">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S33</Alias>
+	<Alias Alias="34">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S34</Alias>
+	<Alias Alias="35">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S35</Alias>
+	<Alias Alias="36">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S36</Alias>
+	<Alias Alias="37">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S37</Alias>
+	<Alias Alias="38">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S38</Alias>
+	<Alias Alias="39">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S39</Alias>
+	<Alias Alias="40">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S40</Alias>
+	<Alias Alias="41">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S41</Alias>
+	<Alias Alias="42">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S42</Alias>
+	<Alias Alias="43">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S43</Alias>
+	<Alias Alias="44">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S44</Alias>
+	<Alias Alias="45">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S45</Alias>
+	<Alias Alias="46">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S46</Alias>
+	<Alias Alias="47">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S47</Alias>
+	<Alias Alias="48">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S48</Alias>
+	<Alias Alias="49">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S49</Alias>
+	<Alias Alias="50">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S50</Alias>
+	<Alias Alias="51">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S51</Alias>
+	<Alias Alias="52">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S52</Alias>
+	<Alias Alias="53">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S53</Alias>
+	<Alias Alias="54">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S54</Alias>
+	<Alias Alias="55">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S55</Alias>
+	<Alias Alias="56">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S56</Alias>
+	<Alias Alias="57">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S57</Alias>
+	<Alias Alias="58">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S58</Alias>
+	<Alias Alias="59">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S59</Alias>
+	<Alias Alias="60">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S60</Alias>
+	<Alias Alias="61">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S61</Alias>
+	<Alias Alias="62">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S62</Alias>
+	<Alias Alias="63">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S63</Alias>
+	<Alias Alias="64">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S64</Alias>
+	<Alias Alias="65">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S65</Alias>
+	<Alias Alias="66">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S66</Alias>
+	<Alias Alias="67">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S67</Alias>
+	<Alias Alias="68">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S68</Alias>
+	<Alias Alias="69">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S69</Alias>
+	<Alias Alias="70">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S70</Alias>
+	<Alias Alias="71">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S71</Alias>
+	<Alias Alias="72">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S72</Alias>
+	<Alias Alias="73">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S73</Alias>
+	<Alias Alias="74">Arp.Plc.Eclr/Prg_DataCollection_FengZhuang1.S74</Alias>
+</Aliases>
+  
+    
+</UANodeSet>
