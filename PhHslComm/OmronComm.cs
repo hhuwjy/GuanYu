@@ -69,8 +69,6 @@ namespace PhHslComm
     #endregion 从Excel中抽象出来的数据类型
 
 
-
-
     class OmronComm
     {
 
@@ -118,12 +116,9 @@ namespace PhHslComm
 
         #endregion 从Excel解析来的数据
 
+
         //创建Grpc实例
         public GrpcTool grpcToolInstance = new GrpcTool();   
-
-        ////暂存数据，将5个结构体数组 变为 一整个字符串数组后 再用过Grpc 发送给IEC
-        //string[] AllDeviceInformation;
-
 
         //CIP连接和线程
         OmronConnectedCipNet[] _cip;
@@ -131,8 +126,6 @@ namespace PhHslComm
         int totalN=0;
         Thread[] thr;
 
-       
-         
 
         #region 设置grpc通讯参数
         // Create options for calls made by client
@@ -146,26 +139,19 @@ namespace PhHslComm
         #endregion
 
 
-        #region 从xml获取nodeid,保存到对应的类，注意xml中的别名要和对应类的属性名一致 调用构造函数时 执行一次
-
-         const string filePath = "/opt/plcnext/apps/GrpcSubscribeNodes.xml";
-        //const string filePath = "D:\\2024\\Work\\12-冠宇数采项目\\ReadFromStructArray\\PhHslComm\\PhHslComm\\GrpcSubscribeNodes\\GrpcSubscribeNodes.xml";
-
         // 实例化一个日志后，就可以使用了
         const string logsFile = ("/opt/plcnext/apps/Logs.txt");
-        ILogNet logNet;
+        //const string logsFile = "D:\\2024\\Work\\12-冠宇数采项目\\ReadFromStructArray\\GuanYu";
+        public ILogNet logNet;
 
-        Dictionary<string, string> nodeidDictionary;
-
-        //Dictionary<string, string> nodeidDictionary = grpcToolInstance.getNodeIdDictionary(filePath);
-        //int count = nodeidDictionary.Count;
-        //int count = 0;
-        #endregion
-
+        //创建nodeID字典
+        public Dictionary<string, string> nodeidDictionary;
 
         public OmronComm(int totalnumber)
         {
             //一个CIP client对应一个thread
+
+            logNet = new LogNetSingle(logsFile);
 
             totalN = totalnumber;
  
@@ -176,37 +162,51 @@ namespace PhHslComm
                 _cip[i] = new OmronConnectedCipNet("192.168.1.31");  //每个Client绑定的ip都是这个
             }
 
-            
+            #region 从xml获取nodeid,保存到对应的类，注意xml中的别名要和对应类的属性名一致 调用构造函数时 执行一次
 
-            nodeidDictionary = grpcToolInstance.getNodeIdDictionary(filePath);  //将xml中的值写入字典中
-            int count = nodeidDictionary.Count;
+            try
+            {
+                const string filePath = "/opt/plcnext/apps/GrpcSubscribeNodes.xml";
+                //const string filePath = "D:\\2024\\Work\\12-冠宇数采项目\\ReadFromStructArray\\PhHslComm\\PhHslComm\\GrpcSubscribeNodes\\GrpcSubscribeNodes.xml";
+
+                nodeidDictionary = grpcToolInstance.getNodeIdDictionary(filePath);  //将xml中的值写入字典中
+                //int count = nodeidDictionary.Count;
+            }
+            catch(Exception e)
+            {
+                logNet.WriteError("Error:"+ e); 
+            }
+ 
+            #endregion     
+
         }
 
-        public OmronComm()
+        public async void CipConnect()
+
         {
-            //一个CIP client对应一个thread
-
-            totalN = 5;
-
-            _cip = new OmronConnectedCipNet[totalN];
-            thr = new Thread[totalN];
+            #region 建立CIP连接    //假如稳态运行后，CIP连接掉线，该如何处理 TODO
             for (int i = 0; i < totalN; i++)
             {
-                _cip[i] = new OmronConnectedCipNet("192.168.1.31");  //每个Client绑定的ip都是这个
+                //var retIn = await _cip[i].ConnectServerAsync(); //长连接
+                var retIn = _cip[i].ConnectServer();
+                if (retIn.IsSuccess)
+                {
+                    //logNet.WriteInfo("num " + i.ToString() + " connect success!");
+                    Console.WriteLine("num {0} connect success!", i);
+                }
+                else
+                {
+                    //logNet.WriteError("num " + i.ToString() + "connect failed!");
+                    Console.WriteLine("num {0} connect failed!", i);
+
+                }
             }
-
-            nodeidDictionary = grpcToolInstance.getNodeIdDictionary(filePath);  //将xml中的值写入字典中
-            int count = nodeidDictionary.Count;
-            //nodeidDictionary = grpcToolInstance.getNodeIdDictionary(filePath);  //将xml中的值写入字典中
-
-            logNet = new LogNetSingle(logsFile);
-
+            #endregion
 
         }
-
-        public async void connect()
+        public async void GrpcConnect()
         {
-            #region 建立Grpc连接
+            #region 建立Grpc连接  // //假如稳态运行后，Grpc连接掉线，该如何处理 TODO
             var udsEndPoint = new UnixDomainSocketEndPoint("/run/plcnext/grpc.sock");
             var connectionFactory = new UnixDomainSocketConnectionFactory(udsEndPoint);
             var socketsHttpHandler = new SocketsHttpHandler
@@ -220,27 +220,7 @@ namespace PhHslComm
             });
             grpcDataAccessServiceClient = new IDataAccessService.IDataAccessServiceClient(channel);// Create a gRPC client for the Data Access Service on that channel
             #endregion
-
-
-            #region 建立CIP连接
-            for (int i = 0; i < totalN; i++)
-            {
-                //var retIn = await _cip[i].ConnectServerAsync(); //长连接
-                var retIn =  _cip[i].ConnectServer();
-                if (retIn.IsSuccess)
-                {
-                    logNet.WriteInfo("num "+i.ToString()+" connect success!");
-                    //Console.WriteLine("num {0} connect success!", i);
-                }
-                else
-                {
-                    logNet.WriteError("num " + i.ToString() + "connect failed!");
-                    //Console.WriteLine("num {0} connect failed!", i);
-
-                    //Thread.Sleep(100);
-                }
-            }
-            #endregion
+ 
         }
 
         //创建对应线程
@@ -279,6 +259,8 @@ namespace PhHslComm
             });
             thr[4].Start();
 
+            //thr[0].Join();
+
         }
 
 
@@ -311,21 +293,19 @@ namespace PhHslComm
                         ReadOneSecData(Grating_Error,cip);
                         ReadOneSecData(Scapegoat_Error, cip);
                         ReadOneSecData(Door_Error, cip);
-                        
-
-                        //ReadOneSecData(out_power,cip);   中文读取有问题，待解决 TODO
+                        ReadOneSecData(out_power,cip);   
                     }
                     else
                     {
-                        logNet.WriteInfo("No Warning");
-                        //Console.WriteLine("No Warning");
+                        //logNet.WriteInfo("No Warning");
+                        Console.WriteLine("No Warning");
                     }
                    
                 }
                 else
                 {
-                    logNet.WriteError("Y6[5] read failed");
-                    //Console.WriteLine("Y6[5] read failed");
+                    //logNet.WriteError("Y6[5] read failed");
+                    Console.WriteLine("Y6[5] read failed");
                 }
 
 
@@ -333,10 +313,8 @@ namespace PhHslComm
                 ReadOneSecData(Sys_Manual,cip);
                 ReadOneSecData(Y6, cip);
                 ReadOneSecData(Manual_Andon, cip);
-
                 ReadOneSecData(Production_statistics, cip);
                 ReadOneSecData(Cutterused_statistics, cip);
-
 
 
                 //计算从开始读到读完的时间
@@ -347,7 +325,12 @@ namespace PhHslComm
                 logNet.WriteInfo("Thread ReadOnceSecInfo read time : " + (dur.TotalMilliseconds).ToString());
                 //Console.WriteLine("Thread ReadOnceSecInfo read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
-                Thread.Sleep(950);//由于1000ms采集时间较长，所以线程延时的时间较长
+
+                if (dur.TotalMilliseconds < 100)
+                {
+                    int sleepTime = 1000 - (int)end.TotalMilliseconds;
+                    Thread.Sleep(sleepTime);
+                }
 
             }
         }
@@ -369,13 +352,10 @@ namespace PhHslComm
 
                 TimeSpan start = new TimeSpan(DateTime.Now.Ticks);
 
-
                 ReadDeviceInfoConSturct1(Auto_Process, cip, AllDeviceInformation);
-
 
                 ReadDeviceInfoConSturct1(Clear_Manual, cip, AllDeviceInformation);
                 ReadDeviceInfoDisStruct2(Battery_Memory,cip, AllDeviceInformation);
-
 
                 ReadDeviceInfoDisStruct2(BarCode, cip, AllDeviceInformation);
                 ReadDeviceInfoDisStruct2(EarCode, cip, AllDeviceInformation);
@@ -406,12 +386,7 @@ namespace PhHslComm
                         Console.WriteLine("ERRO: {0}，{1}", e,nodeidDictionary.GetValueOrDefault(StationName_Now));
                     }
 
-                    writeItems = listWriteItem.ToArray();
-                    var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItems);
-
-                    //Write Data to DataAccessService                  
-                    bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
-
+                    SendDataToIEC(listWriteItem);
                     #endregion 
 
                 }
@@ -444,12 +419,11 @@ namespace PhHslComm
                 TimeSpan start = new TimeSpan(DateTime.Now.Ticks);
 
                 //根据Auto_Process的值，判断是否需要读取对应工位的数据
-           
 
                 OperateResult<int>  ret = cip.ReadInt32("Auto_process[32]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content < 50 && ret.Content >= 20) ReadStation(reya, ref cip);
+                    if (ret.Content < 50 && ret.Content >= 20) ReadStation(reya, cip);
                 }
                 else
                 {
@@ -457,16 +431,12 @@ namespace PhHslComm
                     //Console.WriteLine("Auto_process[32] read failed");
                 }
 
-               
-
-               
-
                 TimeSpan end = new TimeSpan(DateTime.Now.Ticks);
                 DateTime nowDisplay = DateTime.Now;
                 TimeSpan dur = (start - end).Duration();
 
-                logNet.WriteInfo("Thread ReadStationInfo1 read time : " + (dur.TotalMilliseconds).ToString());
-                //Console.WriteLine("Thread ReadStationInfo1 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
+                //logNet.WriteInfo("Thread ReadStationInfo1 read time : " + (dur.TotalMilliseconds).ToString());
+                Console.WriteLine("Thread ReadStationInfo1 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
 
                 if (dur.TotalMilliseconds < 100)
@@ -490,7 +460,7 @@ namespace PhHslComm
                 OperateResult<int> ret = cip.ReadInt32("Auto_process[18]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content < 50 && ret.Content >= 25) ReadStation(dingfeng, ref cip);
+                    if (ret.Content < 50 && ret.Content >= 25)  ReadStation(dingfeng, cip);
 
                 }
                 else
@@ -502,7 +472,7 @@ namespace PhHslComm
                 ret = cip.ReadInt32("Auto_process[9]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content >= 40 && ret.Content < 70) ReadStation(chongmo, ref cip);
+                    if (ret.Content >= 40 && ret.Content < 70)  ReadStation(chongmo, cip);
                 }
                 else
                 {
@@ -513,7 +483,7 @@ namespace PhHslComm
                 ret = cip.ReadInt32("Auto_process[43]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content < 45 && ret.Content >= 30) ReadStation(zuojiaofeng, ref cip);
+                    if (ret.Content < 45 && ret.Content >= 30) ReadStation(zuojiaofeng, cip);
                 }
                 else
                 {
@@ -521,13 +491,12 @@ namespace PhHslComm
                     //Console.WriteLine("Auto_process[43] read failed");
                 }
 
-         
                 TimeSpan end = new TimeSpan(DateTime.Now.Ticks);
                 DateTime nowDisplay = DateTime.Now;
                 TimeSpan dur = (start - end).Duration();
 
-                logNet.WriteInfo("Thread ReadStationInfo2 read time : " + (dur.TotalMilliseconds).ToString());
-                //Console.WriteLine("Thread ReadStationInfo2 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
+                //logNet.WriteInfo("Thread ReadStationInfo2 read time : " + (dur.TotalMilliseconds).ToString());
+                Console.WriteLine("Thread ReadStationInfo2 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
 
                 if (dur.TotalMilliseconds < 100)
@@ -552,25 +521,24 @@ namespace PhHslComm
                 OperateResult<int> ret = cip.ReadInt32("Auto_process[44]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content < 45 && ret.Content >= 30) ReadStation(youjiaofeng, ref cip);
+                    if (ret.Content < 45 && ret.Content >= 30) ReadStation(youjiaofeng, cip);  
                 }
                 else
                 {
                     logNet.WriteInfo("Auto_process[44] read failed ");
-                    //Console.WriteLine("Auto_process[44] read failed");
+                    Console.WriteLine("Auto_process[44] read failed");
                 }
 
 
                 ret = cip.ReadInt32("Auto_process[47]");
                 if (ret.IsSuccess)
                 {
-                    if (ret.Content < 60 && ret.Content >= 30) ReadStation(cefeng, ref cip);
-
+                    if (ret.Content < 60 && ret.Content >= 30) ReadStation(cefeng, cip);
                 }
                 else
                 {
                     logNet.WriteInfo("Auto_process[47] read failed ");
-                    //Console.WriteLine("Auto_process[47] read failed");
+                    Console.WriteLine("Auto_process[47] read failed");
                 }
 
                 TimeSpan end = new TimeSpan(DateTime.Now.Ticks);
@@ -578,7 +546,7 @@ namespace PhHslComm
                 TimeSpan dur = (start - end).Duration();
 
                 logNet.WriteInfo("Thread ReadStationInfo3 read time : " + (dur.TotalMilliseconds).ToString());
-                //Console.WriteLine("Thread ReadStationInfo3 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
+                Console.WriteLine("Thread ReadStationInfo3 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
 
                 if (dur.TotalMilliseconds < 100)
@@ -592,27 +560,31 @@ namespace PhHslComm
 
 
         #region Function 读取六个工位的数据
-        public void ReadStation(StationInfoStruct_CIP[] input, ref OmronConnectedCipNet cip)
+        public  async void ReadStation(StationInfoStruct_CIP[] input, OmronConnectedCipNet cip)
         {
             var tempstring = "";  //暂存取到的string数据
             int count = 0; //计数器
             string StationName_Now = CN2EN(input[0].stationName); //将当前结构体数组的工位名读取出来，后续在xml文件中对应,中文转拼音（英文）
-
+            var listWriteItem = new List<WriteItem>();
+            WriteItem[] writeItems = new WriteItem[] { };
+  
             foreach (var tmp in input)
             {
+              
                 if (tmp.varType == "DINT")
                 {
 
-                    OperateResult<int> ret = cip.ReadInt32(tmp.varName);
+                    OperateResult<int> ret =  cip.ReadInt32(tmp.varName);
+
                     if (ret.IsSuccess)
                     {
-                        tempstring += ret.Content.ToString()+",";
+                        tempstring += ret.Content.ToString() + ",";
                         count++;
                     }
                     else
                     {
-                        logNet.WriteInfo(tmp.varName + "read failed");
-                        //Console.WriteLine(tmp.varName + "read failed");
+                        //logNet.WriteInfo(tmp.varName + "read failed");
+                        Console.WriteLine(tmp.varName + "read failed");
 
                     }
                 }
@@ -620,16 +592,16 @@ namespace PhHslComm
                 if (tmp.varType == "INT")
                 {
 
-                    OperateResult<short> ret = cip.ReadInt16(tmp.varName);
+                    OperateResult<short> ret =  cip.ReadInt16(tmp.varName);
                     if (ret.IsSuccess)
                     {
-                        tempstring += ret.Content.ToString()+",";
+                        tempstring += ret.Content.ToString() + ",";
                         count++;
                     }
                     else
                     {
-                        logNet.WriteInfo(tmp.varName + "read failed");
-                        //Console.WriteLine(tmp.varName + "read failed");
+                        //logNet.WriteInfo(tmp.varName + "read failed");
+                        Console.WriteLine(tmp.varName + "read failed");
 
                     }
                 }
@@ -637,27 +609,25 @@ namespace PhHslComm
                 if (tmp.varType == "REAL")
                 {
 
-                    OperateResult<float> ret = cip.ReadFloat(tmp.varName);
+                    OperateResult<float> ret =  cip.ReadFloat(tmp.varName);
                     if (ret.IsSuccess)
                     {
-                        tempstring += ret.Content.ToString()+",";
+                        tempstring += ret.Content.ToString() + ",";
                         count++;
                     }
                     else
                     {
-                        logNet.WriteInfo(tmp.varName + "read failed");
-                        //Console.WriteLine(tmp.varName + "read failed");
+                        //logNet.WriteInfo(tmp.varName + "read failed");
+                        Console.WriteLine(tmp.varName + "read failed");
                     }
                 }
+
 
                 if (count == input.Length)
                 {
                     #region Grpc发送给IEC
 
-                    var listWriteItem = new List<WriteItem>();
-                    WriteItem[] writeItems = new WriteItem[] { };
                     writeItems = null;
-
                     try
                     {
                         listWriteItem.Add(grpcToolInstance.CreatWriteItem(nodeidDictionary.GetValueOrDefault(StationName_Now), Arp.Type.Grpc.CoreType.CtString, tempstring)); //todo:待优化floatArr改为Content
@@ -667,12 +637,7 @@ namespace PhHslComm
                         Console.WriteLine("ERRO: {0}", e);
                     }
 
-                    writeItems = listWriteItem.ToArray();
-                    var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItems);
-
-                    //Write Data to DataAccessService                  
-                    bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
-
+                    SendDataToIEC(listWriteItem);
                     #endregion
                 }
             }
@@ -687,6 +652,7 @@ namespace PhHslComm
             ushort Auto_Process_Length = 86;  // 数组长度为硬编码，由Excel读出，不知后续需要是否需要更改
             ushort Clear_Manual = 75;
             var tempstring = ""; //用来发送的字符串
+
             if (input[0].varType == "DINT")
             {
                 OperateResult<int[]> ret = cip.ReadInt32(ReadObject, Auto_Process_Length);
@@ -791,8 +757,9 @@ namespace PhHslComm
             ushort ush;
             var tempstring = "";  //暂存取到的string数据
             int StructNumber = 0; //记录中文结构体读了多少个了，读完以后一起发给Grpc
+            var listWriteItem = new List<WriteItem>();
+            WriteItem[] writeItems = new WriteItem[] { };
 
-           
             if (input[0].varType == "BOOL" && input[0].varName != "Manual_Andon[10]")   //区分Manual_Andon 不连续数组
             {
                 ush = (ushort)input.Length;
@@ -800,12 +767,9 @@ namespace PhHslComm
 
                 if (ret.IsSuccess)
                 {
-
                     #region Grpc发送给IEC
 
-                    var listWriteItem = new List<WriteItem>();
-                    WriteItem[] writeItems = new WriteItem[] { };
-                    writeItems = null;
+                    writeItems = null;  //先清空
                     try
                     {
                         listWriteItem.Add(grpcToolInstance.CreatWriteItem(nodeidDictionary.GetValueOrDefault(input[0].varName), Arp.Type.Grpc.CoreType.CtArray, ret.Content));
@@ -815,19 +779,15 @@ namespace PhHslComm
                         Console.WriteLine("ERRO: {0}", e);
                     }
 
-                    writeItems = listWriteItem.ToArray();
-                    var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItems);
-
-                    //WriteData to DataAccessService
-                    bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
+                   SendDataToIEC(listWriteItem);  //不等待其完成
 
                     #endregion 
 
                 }
                 else
                 {
-                    logNet.WriteInfo(input[0].varName + "read failed");
-                    //Console.WriteLine(input[0].varName + "read failed");
+                    //logNet.WriteInfo(input[0].varName + "read failed");
+                    Console.WriteLine(input[0].varName + "read failed");
                 }
             }
 
@@ -844,11 +804,9 @@ namespace PhHslComm
                         StructNumber++;
                         if (StructNumber == input.Length)
                         {
+                            StructNumber = 0; //计数清零
 
                             #region Grpc发送给IEC
-
-                            var listWriteItem = new List<WriteItem>();
-                            WriteItem[] writeItems = new WriteItem[] { };
                             writeItems = null;
 
                             listWriteItem.Clear();
@@ -865,30 +823,23 @@ namespace PhHslComm
 
                                 }
 
-
                             }
                             catch (Exception e)
                             {
                                 Console.WriteLine("ERRO: {0}", e);
                             }
 
-                            writeItems = listWriteItem.ToArray();
-                            var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItems);
-
-                            //Write Data to DataAccessService                  
-                            bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
+                            SendDataToIEC(listWriteItem);  //不等待其完成
 
                             #endregion 
-
-                            StructNumber = 0; //计数清零
 
                         }
                     }
 
                     else
                     {
-                        logNet.WriteInfo(tmp.varName + "read failed");
-                       // Console.WriteLine(tmp.varName + "read failed");
+                        //logNet.WriteInfo(tmp.varName + "read failed");
+                        Console.WriteLine(tmp.varName + "read failed");
                     }
 
                 }       
@@ -903,10 +854,7 @@ namespace PhHslComm
 
                     #region Grpc发送给IEC
 
-                    var listWriteItem = new List<WriteItem>();
-                    WriteItem[] writeItems = new WriteItem[] { };
                     writeItems = null;
-
                     try
                     {
                         listWriteItem.Add(grpcToolInstance.CreatWriteItem(nodeidDictionary.GetValueOrDefault(input[0].varName), Arp.Type.Grpc.CoreType.CtArray, ret.Content));
@@ -916,25 +864,37 @@ namespace PhHslComm
                         Console.WriteLine("ERRO: {0}", e);
                     }
 
-                    writeItems = listWriteItem.ToArray();
-                    var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItems);
-
-                    //Write Data to DataAccessService                  
-                    bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
-
+                    SendDataToIEC(listWriteItem);  
                     #endregion 
 
                 }
                 else
                 {
-                    logNet.WriteInfo(input[0].varName + "read failed");
-                    //Console.WriteLine(input[0].varName + "read failed");
+                    //logNet.WriteInfo(input[0].varName + "read failed");
+                    Console.WriteLine(input[0].varName + "read failed");
                 }
             }
 
         }
         #endregion
 
+
+        private void SendDataToIEC(List<WriteItem> writeItems)
+        {
+            try
+            {
+                var writeItemsArray = writeItems.ToArray();
+                var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItemsArray);
+                bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
+
+            }
+            catch(Exception e) 
+            {
+                Console.WriteLine("ERRO: {0}", e);
+            }
+
+
+        }
 
         //XML标签转换 工位结构体数组的工位名是中文，为了方便XML与字典对应，需要转化为英文
         public string CN2EN(string NameCN)
