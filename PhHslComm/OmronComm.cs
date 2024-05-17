@@ -144,6 +144,8 @@ namespace PhHslComm
         //const string logsFile = "D:\\2024\\Work\\12-冠宇数采项目\\ReadFromStructArray\\GuanYu";
         public ILogNet logNet;
 
+        int CIPNumber = 9;
+
         //创建nodeID字典
         public Dictionary<string, string> nodeidDictionary;
 
@@ -155,9 +157,11 @@ namespace PhHslComm
 
             totalN = totalnumber;
  
-            _cip = new OmronConnectedCipNet[totalN];
+            _cip = new OmronConnectedCipNet[9];
             thr = new Thread[totalN];
-            for (int i = 0; i < totalnumber; i++)
+
+
+            for (int i = 0; i < CIPNumber; i++)
             {
                 _cip[i] = new OmronConnectedCipNet("192.168.1.31");  //每个Client绑定的ip都是这个
             }
@@ -185,7 +189,9 @@ namespace PhHslComm
 
         {
             #region 建立CIP连接    //假如稳态运行后，CIP连接掉线，该如何处理 TODO
-            for (int i = 0; i < totalN; i++)
+
+            //int CIPNumber = 9;
+            for (int i = 0; i < CIPNumber; i++)
             {
                 //var retIn = await _cip[i].ConnectServerAsync(); //长连接
                 var retIn = _cip[i].ConnectServer();
@@ -237,7 +243,7 @@ namespace PhHslComm
             ////读设备信息
             thr[1] = new Thread(() =>
             {
-                this.ReadDeviceInfo(_cip[1]);
+                this.ReadDeviceInfo(_cip[1], _cip[2], _cip[3], _cip[4], _cip[5]);
             });
             thr[1].Start();
 
@@ -245,21 +251,23 @@ namespace PhHslComm
             //读六大工位信息
             thr[2] = new Thread(() =>
             {
-                this.ReadStationInfo1(_cip[2]);
+                this.ReadStationInfo1(_cip[6]);
             });
             thr[2].Start();
             thr[3] = new Thread(() =>
             {
-                this.ReadStationInfo2(_cip[3]);
+                this.ReadStationInfo2(_cip[7]);
             });
             thr[3].Start();
             thr[4] = new Thread(() =>
             {
-                this.ReadStationInfo3(_cip[4]);
+                this.ReadStationInfo3(_cip[8]);
             });
             thr[4].Start();
 
             //thr[0].Join();
+            ///
+
 
         }
 
@@ -322,8 +330,8 @@ namespace PhHslComm
                 DateTime nowDisplay = DateTime.Now;
                 TimeSpan dur = (end - start).Duration();
 
-                logNet.WriteInfo("Thread ReadOnceSecInfo read time : " + (dur.TotalMilliseconds).ToString());
-                //Console.WriteLine("Thread ReadOnceSecInfo read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
+                //logNet.WriteInfo("Thread ReadOnceSecInfo read time : " + (dur.TotalMilliseconds).ToString());
+                Console.WriteLine("Thread ReadOnceSecInfo read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
 
                 if (dur.TotalMilliseconds < 100)
@@ -338,45 +346,67 @@ namespace PhHslComm
 
 
         #region Thread2 读设备信息
-        public void ReadDeviceInfo(OmronConnectedCipNet cip)
-        {
-            
+        public void ReadDeviceInfo(OmronConnectedCipNet cip1, OmronConnectedCipNet cip2, OmronConnectedCipNet cip3, OmronConnectedCipNet cip4, OmronConnectedCipNet cip5)
+        {        
             while (true)
-            {
-                string[] AllDeviceInformation;
-                AllDeviceInformation = new string[75];
-                for (int i = 0; i < AllDeviceInformation.Length; i++)
-                {
-                    AllDeviceInformation[i] = ""; // 将每个元素初始化为空字符串
-                }
-
+            {             
                 TimeSpan start = new TimeSpan(DateTime.Now.Ticks);
 
-                ReadDeviceInfoConSturct1(Auto_Process, cip, AllDeviceInformation);
 
-                ReadDeviceInfoConSturct1(Clear_Manual, cip, AllDeviceInformation);
-                ReadDeviceInfoDisStruct2(Battery_Memory,cip, AllDeviceInformation);
+                //  TODO  这里可以优化，把一部分初始化工作放到外面去
 
-                ReadDeviceInfoDisStruct2(BarCode, cip, AllDeviceInformation);
-                ReadDeviceInfoDisStruct2(EarCode, cip, AllDeviceInformation);
+                int NumberOfStation = 75;
+                string[] Auto_Process_String = new string[NumberOfStation];
+                string[] Clear_Manual_String = new string[NumberOfStation];
+                string[] Battery_Memory_String = new string[NumberOfStation];
+                string[] BarCode_String = new string[NumberOfStation];
+                string[] EarCode_String = new string[NumberOfStation];
 
-                for (int i= 1; i <AllDeviceInformation.Length; i++)
+                var listWriteItem = new List<WriteItem>();
+                WriteItem[] writeItems = new WriteItem[] { };
+
+
+                for (int i=0; i<NumberOfStation; i++)
+                {
+                    Auto_Process_String[i] = " ";
+                    Clear_Manual_String[i] = " ";
+                    Battery_Memory_String[i] = " ";
+                    BarCode_String[i] = " ";
+                    EarCode_String[i] = " ";
+                }
+
+                string tempstring = "";
+               
+                Action[] actions = new Action[]
+                {
+                    () => ReadDeviceInfoConSturct1(Auto_Process, cip1, Auto_Process_String),
+                    () => ReadDeviceInfoConSturct1(Clear_Manual, cip2, Clear_Manual_String),
+                    () => ReadDeviceInfoDisStruct2(Battery_Memory, cip3, Battery_Memory_String),
+                    () => ReadDeviceInfoDisStruct2(BarCode, cip4, BarCode_String),
+                    () => ReadDeviceInfoDisStruct2(EarCode, cip5, EarCode_String)
+                };
+
+                Parallel.ForEach(actions, action => action());
+
+                for (int i= 1; i < NumberOfStation; i++)
                 {
                     string StationName_Now = (i).ToString() ;
                     //Console.WriteLine("{0}", StationName_Now);
+                    if (Auto_Process_String[i] != "")   tempstring += Auto_Process_String[i];                   
+                    if (Battery_Memory_String[i] != "") tempstring += Battery_Memory_String[i] ;
+                    if (Clear_Manual_String[i] != "") tempstring += Clear_Manual_String[i];
+                    if (BarCode_String[i] != "")        tempstring += BarCode_String[i] ;
+                    if (EarCode_String[i] != "")        tempstring += EarCode_String[i] ;
 
+                    tempstring = tempstring.Replace(" ", "");
                     // AllDeviceInformation 为字符串数组，每一个元素都对应一个工位的值 
                     #region Grpc发送给IEC
-
-                    var listWriteItem = new List<WriteItem>();
-                    WriteItem[] writeItems = new WriteItem[] { };
-                    writeItems = null;
-
-                    listWriteItem.Clear();
+                   
+                    //writeItems = null;
 
                     try
                     {
-                        listWriteItem.Add(grpcToolInstance.CreatWriteItem(nodeidDictionary[StationName_Now], Arp.Type.Grpc.CoreType.CtString, AllDeviceInformation[i]));
+                        listWriteItem.Add(grpcToolInstance.CreatWriteItem(nodeidDictionary[StationName_Now], Arp.Type.Grpc.CoreType.CtString, tempstring));
                         //Console.WriteLine("{0}", AllDeviceInformation[i]);
                         //Console.WriteLine(nodeidDictionary[StationName_Now]);
                     }
@@ -386,8 +416,13 @@ namespace PhHslComm
                         Console.WriteLine("ERRO: {0}，{1}", e,nodeidDictionary.GetValueOrDefault(StationName_Now));
                     }
 
+                    tempstring = null; //清空string
+                    var test = listWriteItem;
+                    //SendDataToIECAsync(test);
+                    
                     SendDataToIEC(listWriteItem);
-                    #endregion 
+                    #endregion
+
 
                 }
 
@@ -395,10 +430,8 @@ namespace PhHslComm
                 DateTime nowDisplay = DateTime.Now;
                 TimeSpan dur = (start - end).Duration();
 
-
-                logNet.WriteInfo("Thread ReadDeviceInfo read time : " + (dur.TotalMilliseconds).ToString());
-                //Console.WriteLine("Thread ReadDeviceInfo read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
-
+                //logNet.WriteInfo("Thread ReadDeviceInfo read time : " + (dur.TotalMilliseconds).ToString());
+                Console.WriteLine("Thread ReadDeviceInfo read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
                 if (dur.TotalMilliseconds < 100)
                 {
@@ -408,7 +441,7 @@ namespace PhHslComm
 
             }
         }
-        #endregion Thread2 读设备信息
+        #endregion 
 
 
         #region Thread3 读工位信息
@@ -525,7 +558,7 @@ namespace PhHslComm
                 }
                 else
                 {
-                    logNet.WriteInfo("Auto_process[44] read failed ");
+                    //logNet.WriteInfo("Auto_process[44] read failed ");
                     Console.WriteLine("Auto_process[44] read failed");
                 }
 
@@ -537,7 +570,7 @@ namespace PhHslComm
                 }
                 else
                 {
-                    logNet.WriteInfo("Auto_process[47] read failed ");
+                    //logNet.WriteInfo("Auto_process[47] read failed ");
                     Console.WriteLine("Auto_process[47] read failed");
                 }
 
@@ -545,7 +578,7 @@ namespace PhHslComm
                 DateTime nowDisplay = DateTime.Now;
                 TimeSpan dur = (start - end).Duration();
 
-                logNet.WriteInfo("Thread ReadStationInfo3 read time : " + (dur.TotalMilliseconds).ToString());
+                //logNet.WriteInfo("Thread ReadStationInfo3 read time : " + (dur.TotalMilliseconds).ToString());
                 Console.WriteLine("Thread ReadStationInfo3 read time:{0} read Duration:{1}", nowDisplay.ToString("yyyy-MM-dd HH:mm:ss:fff"), dur.TotalMilliseconds);
 
 
@@ -560,7 +593,7 @@ namespace PhHslComm
 
 
         #region Function 读取六个工位的数据
-        public  async void ReadStation(StationInfoStruct_CIP[] input, OmronConnectedCipNet cip)
+        public void ReadStation(StationInfoStruct_CIP[] input, OmronConnectedCipNet cip)
         {
             var tempstring = "";  //暂存取到的string数据
             int count = 0; //计数器
@@ -663,7 +696,6 @@ namespace PhHslComm
                         tempstring = ret.Content[input[i].varIndex].ToString()+ ",";  
                         Output[input[i].stationNumber] += tempstring;
                     }
-
                 }
                 else
                 {
@@ -690,6 +722,7 @@ namespace PhHslComm
 
                 }
             }
+            //return Task.CompletedTask;
         }
         #endregion Function 读取Auto_Process 和Clear_Manual （以数组形式一起读上来，再按照序号写入对应的工位里）
 
@@ -747,6 +780,7 @@ namespace PhHslComm
 
                 }
             }
+            //return Task.CompletedTask;
         }
         #endregion Function 读取剩余的设备信息（每个数据都是一个个读取）
 
@@ -878,6 +912,11 @@ namespace PhHslComm
         }
         #endregion
 
+        private async Task SendDataToIECAsync(List<WriteItem> writeItems)
+        {
+            Task.Run(() => SendDataToIEC(writeItems));
+            
+        }
 
         private void SendDataToIEC(List<WriteItem> writeItems)
         {
@@ -886,14 +925,11 @@ namespace PhHslComm
                 var writeItemsArray = writeItems.ToArray();
                 var dataAccessServiceWriteRequest = grpcToolInstance.ServiceWriteRequestAddDatas(writeItemsArray);
                 bool result = grpcToolInstance.WriteDataToDataAccessService(grpcDataAccessServiceClient, dataAccessServiceWriteRequest, new IDataAccessServiceWriteResponse(), options1);
-
             }
             catch(Exception e) 
             {
                 Console.WriteLine("ERRO: {0}", e);
             }
-
-
         }
 
         //XML标签转换 工位结构体数组的工位名是中文，为了方便XML与字典对应，需要转化为英文
