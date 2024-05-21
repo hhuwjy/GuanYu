@@ -336,7 +336,7 @@ namespace PhHslComm
 
                 if (dur.TotalMilliseconds < 100)
                 {
-                    int sleepTime = 1000 - (int)end.TotalMilliseconds;
+                    int sleepTime = 1000 - (int)dur.TotalMilliseconds;
                     Thread.Sleep(sleepTime);
                 }
 
@@ -435,7 +435,7 @@ namespace PhHslComm
 
                 if (dur.TotalMilliseconds < 100)
                 {
-                    int sleepTime = 100 - (int)end.TotalMilliseconds;
+                    int sleepTime = 100 - (int)dur.TotalMilliseconds;
                     Thread.Sleep(sleepTime);
                 }
 
